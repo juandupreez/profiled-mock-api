@@ -9,7 +9,7 @@ import { givenFileHasContents } from "../testutil/test-utils"
 
 global.console = require('console')
 
-describe('MockApiServer', () => {
+describe('MockApiServer: Base URI', () => {
 
     const mockFileRepository: FileRepository = mock(FileRepository)
 
@@ -87,7 +87,7 @@ describe('MockApiServer', () => {
         ['OPTIONS', async () => await axios.options(hostUrl + '/')],
     ])('500 METHOD /: should return 500 when reading throws strange error', async (method: string, axiosCall: () => Promise<any>) => {
         when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/'))).thenResolve([method + '.200.json'])
-        when(mockFileRepository.readFileContents(path.join('resources/default/' + method + '.200.json')))
+        when(mockFileRepository.readFileContents(path.join('resources/default/', method + '.200.json')))
             .thenReject(new Error("some generic error"))
 
         try {

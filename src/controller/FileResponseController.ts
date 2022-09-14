@@ -20,7 +20,11 @@ export class FileResponseController {
             const profileBaseDir: string = this.profileService.getCurProfileBaseDir()
             const requestUri: string = req.url
             const method: string = req.method
-            const possibleResponseFilePaths: string[] = await this._getPossibleFilePaths(path.join(profileBaseDir, requestUri), method)
+
+            const possibleResponseFilePaths: string[] = [
+                ...await this._getPossibleFilePathsByFile(path.join(profileBaseDir, requestUri), method, path.normalize(profileBaseDir)),
+                ...await this._getPossibleFilePathsByDirectory(path.join(profileBaseDir, requestUri), method)
+            ]
             const chosenResponseFileLocation: string = this._assertExistsAndSelectSingleFilePath(possibleResponseFilePaths, path.join(profileBaseDir, requestUri), method)
             const extractedStatus: number = this._extractStatusFromFilePath(chosenResponseFileLocation)
             console.log('Looking for file: ' + chosenResponseFileLocation)
@@ -41,8 +45,23 @@ export class FileResponseController {
             }
         }
     }
+    private async _getPossibleFilePathsByFile (directoryPath: string, method: string, dirToExclude: string): Promise<string[]> {
+        if (path.normalize(directoryPath) == path.normalize(dirToExclude + '\\') ) {
+            return []
+        }
+        const oneDirectoryUp: string = path.normalize(path.join(directoryPath, '..'))
+        const lastUriPartToUseAsFile: string = directoryPath.replace(oneDirectoryUp, "")
+        const allFilesInOneUpDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(oneDirectoryUp)
+        const fileNamesWithLastUriPartAndMethod: string[] = allFilesInOneUpDirectory.filter((singleFileName) => {
+            return path.join('/', singleFileName).includes(lastUriPartToUseAsFile + '.' + method)
+        })
+        const filteredFilesWithDirectory: string[] = fileNamesWithLastUriPartAndMethod.map((singleFileName: string) => {
+            return path.join(oneDirectoryUp, singleFileName)
+        })
+        return filteredFilesWithDirectory
+    }
 
-    private async _getPossibleFilePaths (directoryPath: string, method: string): Promise<string[]> {
+    private async _getPossibleFilePathsByDirectory (directoryPath: string, method: string): Promise<string[]> {
         const allFilesInDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(directoryPath)
         const fileNamesWithMethod: string[] = allFilesInDirectory.filter((singleFileName) => {
             return singleFileName.includes(method)
