@@ -291,6 +291,46 @@ describe('MockApiServer: Simple URI', () => {
                 }
             }
         )
+
+        it.each([
+            ['GET', async () => await axios.get(hostUrl + '/one/two')],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {})],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {})],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
+        ])('200 MEHTOD /: should return file /one/two.METHOD.STATUS.json instead of /one/two/METHOD.STATUS.json if both options exist', async (method: string, axiosCall: () => Promise<any>) => {
+            const testResultData: object = { testBaseResponse: 'passed' }
+
+            givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.200.json', testResultData)
+            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(["two." + method + '.200.json'])
+            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.200.json'])
+
+            const response: AxiosResponse = await axiosCall()
+
+            expect(response.status).toBe(200)
+            expect(response.data).toEqual(testResultData)
+        })
+
+        it.each([
+            ['GET', async () => await axios.get(hostUrl + '/one/two')],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {})],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {})],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
+        ])('200 MEHTOD /: should return first file /one/two.METHOD.STATUS.json instead of /one/two/METHOD.STATUS.json if multiple of both options exist', async (method: string, axiosCall: () => Promise<any>) => {
+            const testResultData: object = { testBaseResponse: 'passed' }
+
+            givenFileHasContents(mockFileRepository, 'resources/default/one', "two." + method + '.200.json', testResultData)
+            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(["two." + method + '.200.json', "two." + method + '.500.json'])
+            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.200.json', method + '.500.json'])
+
+            const response: AxiosResponse = await axiosCall()
+
+            expect(response.status).toBe(200)
+            expect(response.data).toEqual(testResultData)
+        })
     })
 
 })
