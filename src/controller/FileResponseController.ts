@@ -46,7 +46,7 @@ export class FileResponseController {
         }
     }
     private async _getPossibleFilePathsByFile (directoryPath: string, method: string, dirToExclude: string): Promise<string[]> {
-        if (path.normalize(directoryPath) == path.normalize(dirToExclude + '\\') ) {
+        if (directoryPath.split(/[\\|/]+$/).join('') == dirToExclude.split(/[\\|/]+$/).join('')) {
             return []
         }
         const oneDirectoryUp: string = path.normalize(path.join(directoryPath, '..'))
