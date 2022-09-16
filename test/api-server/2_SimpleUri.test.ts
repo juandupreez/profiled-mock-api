@@ -139,7 +139,8 @@ describe('MockApiServer: Simple URI', () => {
 
                 expect(response.status).toBe(status)
                 expect(response.data).toEqual(testResultData)
-            })
+            }
+        )
 
         it.each([
             ['GET', async () => await axios.get(hostUrl + '/one/two'), 400],
@@ -174,7 +175,8 @@ describe('MockApiServer: Simple URI', () => {
                     expect(e.response.status).toBe(status)
                     expect(e.response.data).toEqual(testResultData)
                 }
-            })
+            }
+        )
 
         it.each([
             ['GET', async () => await axios.get(hostUrl + '/one/two')],
@@ -220,7 +222,75 @@ describe('MockApiServer: Simple URI', () => {
             expect(response.data).toEqual(testResultData)
         })
 
+        it.each([
+            ['GET', async () => await axios.get(hostUrl + '/one/two'), 200],
+            ['GET', async () => await axios.get(hostUrl + '/one/two'), 201],
+            ['GET', async () => await axios.get(hostUrl + '/one/two'), 202],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {}), 200],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {}), 201],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {}), 202],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {}), 200],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {}), 201],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {}), 202],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {}), 200],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {}), 201],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {}), 202],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two'), 200],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two'), 201],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two'), 202],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 200],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 201],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 202],
+        ])('STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when file is "/one/two.METHOD.STATUS.json',
+            async (method: string, axiosCall: () => Promise<any>, status: number) => {
+                const testResultData: object = { testBaseResponse: 'passed' }
 
+                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(['two.' + method + '.' + status + '.json'])
+                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([])
+                givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.' + status + '.json', testResultData)
+
+                const response: AxiosResponse = await axiosCall()
+
+                expect(response.status).toBe(status)
+                expect(response.data).toEqual(testResultData)
+            }
+        )
+
+        it.each([
+            ['GET', async () => await axios.get(hostUrl + '/one/two'), 400],
+            ['GET', async () => await axios.get(hostUrl + '/one/two'), 301],
+            ['GET', async () => await axios.get(hostUrl + '/one/two'), 502],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {}), 400],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {}), 301],
+            ['POST', async () => await axios.post(hostUrl + '/one/two', {}), 502],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {}), 400],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {}), 301],
+            ['PUT', async () => await axios.put(hostUrl + '/one/two', {}), 502],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {}), 400],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {}), 301],
+            ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {}), 502],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two'), 400],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two'), 301],
+            ['DELETE', async () => await axios.delete(hostUrl + '/one/two'), 502],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 400],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 301],
+            ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 502],
+        ])('STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when file is "/one/two.METHOD.STATUS.json',
+            async (method: string, axiosCall: () => Promise<any>, status: number) => {
+                const testResultData: object = { testBaseResponse: 'passed' }
+                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(['two.' + method + '.' + status + '.json'])
+                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([])
+                givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.' + status + '.json', testResultData)
+
+                try {
+                    const response: AxiosResponse = await axiosCall()
+                    fail('expected call to throw an error')
+                } catch (e) {
+                    expect(e.response.status).toBe(status)
+                    expect(e.response.data).toEqual(testResultData)
+                }
+            }
+        )
     })
 
 })
