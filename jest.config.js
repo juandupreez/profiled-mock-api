@@ -5,8 +5,8 @@ module.exports = {
     testMatch: [
         // "**/test/repository/FileRepository.test.ts",
         // "**/test/handler/MockRequestHandler.test.ts",
-        "**/test/api-server/BaseUri.test.ts",
-        "**/test/api-server/SimpleUri.test.ts",
+        "**/test/api-server/1_BaseUri.test.ts",
+        "**/test/api-server/2_SimpleUri.test.ts",
         
     ],
     transform: {
