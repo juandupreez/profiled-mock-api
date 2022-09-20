@@ -7,8 +7,11 @@ import { mock, instance, when, reset } from 'ts-mockito'
 import path from 'path'
 import { givenFileHasContents } from "../testutil/test-utils"
 import { IdProvider } from "../testutil/IdProvider"
+import { FilteredLogger, GlobalLogger, LogLevel } from "../../src/util/Logger"
 
 global.console = require('console')
+const logger: FilteredLogger = GlobalLogger.getInstance()
+logger.logLevel = LogLevel.OFF
 
 describe('MockApiServer: Simple URI', () => {
 
@@ -101,7 +104,7 @@ describe('MockApiServer: Simple URI', () => {
                 const response: AxiosResponse = await axiosCall()
                 fail('expected call to throw an error')
             } catch (e) {
-                console.log(e)
+                logger.fatal(e)
 
                 expect(e.response.status).toBe(500)
                 expect(e.response.data).toEqual({

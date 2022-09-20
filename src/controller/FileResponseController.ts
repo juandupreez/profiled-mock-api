@@ -3,9 +3,11 @@ import { ParsedQs } from "qs"
 import { FileRepository } from "../repository/FileRepository"
 import path from 'path'
 import { ProfileService } from "../service/ProfileService"
+import { FilteredLogger, GlobalLogger } from "../util/Logger"
 
 export class FileResponseController {
 
+    private readonly logger: FilteredLogger = GlobalLogger.getInstance()
     private readonly fileRepository: FileRepository
     private readonly profileService: ProfileService
 
@@ -27,11 +29,11 @@ export class FileResponseController {
             ]
             const chosenResponseFileLocation: string = this._assertExistsAndSelectSingleFilePath(possibleResponseFilePaths, path.join(profileBaseDir, requestUri), method)
             const extractedStatus: number = this._extractStatusFromFilePath(chosenResponseFileLocation)
-            console.log('Looking for file: ' + chosenResponseFileLocation)
+            this.logger.trace('Looking for file: ' + chosenResponseFileLocation)
             const responseBody: any = await this.fileRepository.readFileContents(chosenResponseFileLocation)
             res.status(extractedStatus).send(responseBody)
         } catch (e) {
-            console.error(e)
+            this.logger.error(e)
 
             if ((e?.message as string ?? '').includes('no such file or directory')
                 || (e?.message as string ?? '').includes('No possible responses found in directory')) {
@@ -76,7 +78,7 @@ export class FileResponseController {
         if (possibleResponseFilePaths.length === 0) {
             throw new Error('No possible responses found in directory: "' + directoryPath + '" for method: ' + method)
         } else if (possibleResponseFilePaths.length > 1) {
-            console.warn('Multiple possible response files. Defaulting to first one: \n\t'
+            this.logger.warn('Multiple possible response files. Defaulting to first one: \n\t'
                 + JSON.stringify(possibleResponseFilePaths[0], null, 2)
                 + '\nAll possibilities: '
                 + JSON.stringify(possibleResponseFilePaths, null, 2))

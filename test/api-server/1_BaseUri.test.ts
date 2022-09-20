@@ -7,8 +7,10 @@ import { mock, instance, when, reset } from 'ts-mockito'
 import path from 'path'
 import { givenFileHasContents } from "../testutil/test-utils"
 import { IdProvider } from "../testutil/IdProvider"
+import { FilteredLogger, GlobalLogger, LogLevel } from "../../src/util/Logger"
 
-global.console = require('console')
+// global.console = require('console')
+
 
 describe('MockApiServer: Base URI', () => {
 
