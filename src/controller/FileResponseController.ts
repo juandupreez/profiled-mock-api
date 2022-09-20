@@ -51,7 +51,7 @@ export class FileResponseController {
         }
         const oneDirectoryUp: string = path.normalize(path.join(directoryPath, '..'))
         const lastUriPartToUseAsFile: string = directoryPath.replace(oneDirectoryUp, "")
-        const allFilesInOneUpDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(oneDirectoryUp)
+        const allFilesInOneUpDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(oneDirectoryUp) ?? []
         const fileNamesWithLastUriPartAndMethod: string[] = allFilesInOneUpDirectory.filter((singleFileName) => {
             return path.join('/', singleFileName).includes(lastUriPartToUseAsFile + '.' + method)
         })
@@ -62,7 +62,7 @@ export class FileResponseController {
     }
 
     private async _getPossibleFilePathsByDirectory (directoryPath: string, method: string): Promise<string[]> {
-        const allFilesInDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(directoryPath)
+        const allFilesInDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(directoryPath) ?? []
         const fileNamesWithMethod: string[] = allFilesInDirectory.filter((singleFileName) => {
             return singleFileName.includes(method)
         })

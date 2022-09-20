@@ -6,6 +6,7 @@ import { FileRepository } from "../../src/repository/FileRepository"
 import { mock, instance, when, reset } from 'ts-mockito'
 import path from 'path'
 import { givenFileHasContents } from "../testutil/test-utils"
+import { IdProvider } from "../testutil/IdProvider"
 
 global.console = require('console')
 
@@ -13,7 +14,8 @@ describe('MockApiServer: Simple URI', () => {
 
     const mockFileRepository: FileRepository = mock(FileRepository)
 
-    const port: number = 3003
+    // const port: number = IdProvider.getInstance().getNextPortNumber()
+    const port: number = 3002
     const hostUrl: string = 'http://localhost:' + port
     const mockServerConfig: MockServerConfig = {
         port: port,
