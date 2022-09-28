@@ -21,6 +21,7 @@ describe('MockApiServer: Base URI', () => {
     const hostUrl: string = 'http://localhost:' + port
     const mockServerConfig: MockServerConfig = {
         port: port,
+        initialActiveProfile: 'default',
         profiles: {
             default: {
                 responseFileBasePath: "./resources/default"

@@ -9,7 +9,7 @@ import { IdProvider } from "../testutil/IdProvider"
 
 global.console = require('console')
 
-describe('MockApiServer: Simple URI', () => {
+describe('MockApiServer: Profile Initialization', () => {
 
     const mockFileRepository: FileRepository = mock(FileRepository)
 
@@ -23,6 +23,7 @@ describe('MockApiServer: Simple URI', () => {
         const hostUrl: string = 'http://localhost:' + port
         const mockServerConfig: MockServerConfig = {
             port: port,
+            initialActiveProfile: 'default',
             profiles: {
                 default: {
                     responseFileBasePath: "./resources/default"
@@ -66,6 +67,7 @@ describe('MockApiServer: Simple URI', () => {
         const hostUrl: string = 'http://localhost:' + port
         const mockServerConfig: MockServerConfig = {
             port: port,
+            initialActiveProfile: 'profile_1_dir',
             profileDirectory: './path/to/profileDirectory',
             fileRepository: instance(mockFileRepository)
         }

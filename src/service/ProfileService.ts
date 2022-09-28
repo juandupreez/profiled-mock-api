@@ -5,6 +5,7 @@ import path from 'path'
 export class ProfileService {
 
     private readonly profiles: { [key: string]: Profile }
+    private activeProfile: string
 
     constructor (profiles?: { [key: string]: Profile }) {
         this.profiles = {}
@@ -37,6 +38,17 @@ export class ProfileService {
         this.profiles[profileName] = {
             responseFileBasePath: profileDirectory
         }
+    }
+
+    assertExistsAndSetActiveProfile (newlyActiveProfile: string) {
+        if (this.profiles[newlyActiveProfile] === undefined) {
+            throw new Error('Could not set active profile (' + newlyActiveProfile + ') because no such profile is configured')
+        }
+        this.activeProfile = newlyActiveProfile
+    }
+
+    getActiveProfile (): string {
+        return this.activeProfile
     }
 
 }

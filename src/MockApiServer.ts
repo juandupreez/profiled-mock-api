@@ -1,4 +1,5 @@
 
+import bodyParser from 'body-parser'
 import express from 'express'
 import http from 'http'
 import { FileResponseController } from './controller/FileResponseController'
@@ -14,7 +15,9 @@ export class MockApiServer {
     private readonly config: MockServerConfig
     private readonly responseController: FileResponseController
     private readonly pathsNotGoingToFileHandler: string[] = [
-        '/profiles'
+        '/profiles',
+        '/activeProfile',
+        '/setActiveProfile'
     ]
     private readonly profileService: ProfileService
     private readonly fileRepository: FileRepository
@@ -24,6 +27,7 @@ export class MockApiServer {
         this.fileRepository = mockServerConfig.fileRepository ?? new FileRepository()
         this.profileService = new ProfileService(this.config.profiles)
         this.profileService.readProfilesFromFileSystem(this.config.profileDirectory, this.fileRepository)
+        this.profileService.assertExistsAndSetActiveProfile(this.config.initialActiveProfile)
         this.responseController = new FileResponseController(
             this.fileRepository,
             this.profileService
@@ -32,6 +36,7 @@ export class MockApiServer {
     }
 
     private _initializeApp () {
+        this.app.use(bodyParser.json())
         this.app.use(async (req, res, next) => {
             if (!this.pathsNotGoingToFileHandler.includes(req.path)) {
                 await this.responseController.handleRequest(req, res)
@@ -42,6 +47,66 @@ export class MockApiServer {
 
         this.app.get('/profiles', (req, res) => {
             res.send(this.profileService.getAllProfiles())
+        })
+
+        this.app.get('/activeProfile', (req, res) => {
+            res.send({
+                activeProfile: this.profileService.getActiveProfile()
+            })
+        })
+
+        this.app.post('/activeProfile', (req, res) => {
+            const newlyActiveProfile: string | undefined = req.body.newlyActiveProfile
+            if (newlyActiveProfile === undefined) {
+                res.status(400).send({
+                    message: 'Could not set active profile. Was expecting body with parameter newlyActiveProfile'
+                })
+            } else {
+                try {
+                    this.profileService.assertExistsAndSetActiveProfile(newlyActiveProfile)
+                    res.send({
+                        activeProfile: this.profileService.getActiveProfile()
+                    })
+                } catch (e) {
+                    this.logger.error(e)
+                    if ((e?.message ?? '' as string).includes('Could not set active profile')) {
+                        res.status(404).send({
+                            message: e.message
+                        })
+                    } else {
+                        res.status(500).send({
+                            message: e.message
+                        })
+                    }
+                }
+            }
+        })
+
+        this.app.get('/setActiveProfile', (req, res) => {
+            const newlyActiveProfile: string = (req.query as any).newlyActiveProfile
+            if (newlyActiveProfile === undefined) {
+                res.status(400).send({
+                    message: 'Could not set active profile. Was expecting URI parameter newlyActiveProfile'
+                })
+            } else {
+                try {
+                    this.profileService.assertExistsAndSetActiveProfile(newlyActiveProfile)
+                    res.send({
+                        activeProfile: this.profileService.getActiveProfile()
+                    })
+                } catch (e) {
+                    this.logger.error(e)
+                    if ((e?.message ?? '' as string).includes('Could not set active profile')) {
+                        res.status(404).send({
+                            message: e.message
+                        })
+                    } else {
+                        res.status(500).send({
+                            message: e.message
+                        })
+                    }
+                }
+            }
         })
     }
 
@@ -61,6 +126,7 @@ export class MockApiServer {
 
 const defaultMockServerConfig: MockServerConfig = {
     port: 3000,
+    initialActiveProfile: 'default',
     profiles: {
         default: {
             responseFileBasePath: "./resources/default"
