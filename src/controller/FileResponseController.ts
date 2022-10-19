@@ -28,7 +28,7 @@ export class FileResponseController {
             ]
             const chosenResponseFileLocation: string = this._assertExistsAndSelectSingleFilePath(possibleResponseFilePaths, path.join(profileBaseDir, requestUri), method)
             const extractedStatus: number = this._extractStatusFromFilePath(chosenResponseFileLocation)
-            this.logger.trace('Looking for file: ' + chosenResponseFileLocation)
+            this.logger.trace('Response file: ' + chosenResponseFileLocation)
             const responseBody: any = await this.fileRepository.readFileContents(chosenResponseFileLocation)
             res.status(extractedStatus).send(responseBody)
         } catch (e) {
@@ -77,7 +77,7 @@ export class FileResponseController {
         if (possibleResponseFilePaths.length === 0) {
             throw new Error('No possible responses found in directory: "' + directoryPath + '" for method: ' + method)
         } else if (possibleResponseFilePaths.length > 1) {
-            this.logger.warn('Multiple possible response files. Defaulting to first one: \n\t'
+            this.logger.warn('Multiple possible response files. Defaulting to first one: \n  '
                 + JSON.stringify(possibleResponseFilePaths[0], null, 2)
                 + '\nAll possibilities: '
                 + JSON.stringify(possibleResponseFilePaths, null, 2))

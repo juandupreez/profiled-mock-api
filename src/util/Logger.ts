@@ -2,40 +2,40 @@ export abstract class FilteredLogger {
 
     logLevel: LogLevel
 
-    abstract logFn (...data: any[]): void
-    abstract errorFn (...data: any[]): void
+    abstract logFn (message?: any, ...optionalParams: any[]): void
+    abstract errorFn (message?: any, ...optionalParams: any[]): void
 
-    trace (...data: any[]): void {
+    trace (message?: any, ...optionalParams: any[]): void {
         if ([
             LogLevel.ALL,
             LogLevel.TRACE
         ].includes(this.logLevel)) {
-            this.logFn(data)
+            this.logFn(message, ...optionalParams)
         }
     }
 
-    debug (...data: any[]): void {
+    debug (message?: any, ...optionalParams: any[]): void {
         if ([
             LogLevel.ALL,
             LogLevel.TRACE,
             LogLevel.DEBUG
         ].includes(this.logLevel)) {
-            this.logFn(data)
+            this.logFn(message, ...optionalParams)
         }
     }
 
-    info (...data: any[]): void {
+    info (message?: any, ...optionalParams: any[]): void {
         if ([
             LogLevel.ALL,
             LogLevel.TRACE,
             LogLevel.DEBUG,
             LogLevel.INFO
         ].includes(this.logLevel)) {
-            this.logFn(data)
+            this.logFn(message, ...optionalParams)
         }
     }
 
-    warn (...data: any[]): void {
+    warn (message?: any, ...optionalParams: any[]): void {
         if ([
             LogLevel.ALL,
             LogLevel.TRACE,
@@ -43,11 +43,11 @@ export abstract class FilteredLogger {
             LogLevel.INFO,
             LogLevel.WARN
         ].includes(this.logLevel)) {
-            this.logFn(data)
+            this.logFn(message, ...optionalParams)
         }
     }
 
-    error (...data: any[]): void {
+    error (message?: any, ...optionalParams: any[]): void {
         if ([
             LogLevel.ALL,
             LogLevel.TRACE,
@@ -56,11 +56,11 @@ export abstract class FilteredLogger {
             LogLevel.WARN,
             LogLevel.ERROR
         ].includes(this.logLevel)) {
-            this.errorFn(data)
+            this.errorFn(message, ...optionalParams)
         }
     }
 
-    fatal (...data: any[]): void {
+    fatal (message?: any, ...optionalParams: any[]): void {
         if ([
             LogLevel.ALL,
             LogLevel.TRACE,
@@ -70,7 +70,7 @@ export abstract class FilteredLogger {
             LogLevel.ERROR,
             LogLevel.FATAL
         ].includes(this.logLevel)) {
-            this.errorFn(data)
+            this.errorFn(message, ...optionalParams)
         }
     }
 }
@@ -87,20 +87,20 @@ export enum LogLevel {
 }
 
 export class ConsoleFilteredLogger extends FilteredLogger {
-    logFn (...data: any[]): void {
-        console.log(data)
+    logFn (message?: any, ...optionalParams: any[]): void {
+        console.log(message, ...optionalParams)
     }
-    errorFn (...data: any[]): void {
-        console.error(data)
+    errorFn (message?: any, ...optionalParams: any[]): void {
+        console.error(message, ...optionalParams)
     }
 }
 
 export class GlobalLogger {
     private static instance: FilteredLogger
 
-    private constructor() {}
+    private constructor () { }
 
-    static getInstance(): FilteredLogger {
+    static getInstance (): FilteredLogger {
         if (this.instance === undefined) {
             this.instance = new ConsoleFilteredLogger()
         }
