@@ -1,0 +1,9 @@
+src
+resources
+bin
+test
+
+jest.config.js
+tsconfig.json
+build.tsconfig.json
+.gitignore

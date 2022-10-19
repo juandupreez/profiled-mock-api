@@ -1,13 +1,14 @@
 {
-  "name": "mock-api",
-  "version": "1.0.0",
+  "name": "profiled-mock-api",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/profiled-mock-api.js",
   "scripts": {
     "start": "ts-node ./bin/start-mock-server.ts",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc -p build.tsconfig.json"
   },
-  "author": "",
+  "author": "jdupreez@mit.edu",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^28.0.8",
