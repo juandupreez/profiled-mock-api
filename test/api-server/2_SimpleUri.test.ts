@@ -13,7 +13,10 @@ global.console = require('console')
 const logger: FilteredLogger = GlobalLogger.getInstance()
 logger.logLevel = LogLevel.OFF
 
-describe('MockApiServer: Simple URI', () => {
+describe.each([
+    ['JSON', '.json', JSON.stringify({ testBaseResponse: 'passed', mock: 'file-contents' }), { testBaseResponse: 'passed', mock: 'file-contents' }],
+    ['XML', '.xml', "<?xml version='1.0' encoding='UTF-8'?>\n<someTag>someValue</someTag>", "<?xml version='1.0' encoding='UTF-8'?>\n<someTag>someValue</someTag>"]
+])('MockApiServer: Simple URI', (typeDescription: string, fileExtension: string, fileContents: string, expectedResponse: any) => {
 
     const mockFileRepository: FileRepository = mock(FileRepository)
 
@@ -53,17 +56,15 @@ describe('MockApiServer: Simple URI', () => {
             ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
             ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
-        ])('200 MEHTOD /one/two: should return file contents as mock response 200 when calling METHOD /one/two', async (method: string, axiosCall: () => Promise<any>) => {
-            const testResultData: object = { testBaseResponse: 'passed' }
-
-            givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.200.json', testResultData)
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve([])
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.200.json'])
+        ])('[' + typeDescription + '] 200 MEHTOD /one/two: should return file contents as mock response 200 when calling METHOD /one/two', async (method: string, axiosCall: () => Promise<any>) => {
+            givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.200' + fileExtension, fileContents)
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve([])
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([method + '.200' + fileExtension])
 
             const response: AxiosResponse = await axiosCall()
 
             expect(response.status).toBe(200)
-            expect(response.data).toEqual(testResultData)
+            expect(response.data).toEqual(expectedResponse)
         })
 
         it.each([
@@ -73,9 +74,9 @@ describe('MockApiServer: Simple URI', () => {
             ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
             ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
-        ])('404 METHOD /one/two: should return 404 when no METHOD.STATUS.json file exists at given path', async (method: string, axiosCall: () => Promise<any>) => {
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve([])
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([])
+        ])('[' + typeDescription + '] 404 METHOD /one/two: should return 404 when no METHOD.STATUS.json file exists at given path', async (method: string, axiosCall: () => Promise<any>) => {
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve([])
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([])
 
             try {
                 const response: AxiosResponse = await axiosCall()
@@ -95,10 +96,10 @@ describe('MockApiServer: Simple URI', () => {
             ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
             ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
-        ])('500 METHOD /one/two: should return 500 when reading throws strange error', async (method: string, axiosCall: () => Promise<any>) => {
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve([])
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.200.json'])
-            when(mockFileRepository.readFileContents(path.join('resources/default/one/two', method + '.200.json')))
+        ])('[' + typeDescription + '] 500 METHOD /one/two: should return 500 when reading throws strange error', async (method: string, axiosCall: () => Promise<any>) => {
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve([])
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([method + '.200' + fileExtension])
+            when(mockFileRepository.readFileContents(path.join('resources/default/one/two', method + '.200' + fileExtension)))
                 .thenReject(new Error("some generic error"))
 
             try {
@@ -133,18 +134,16 @@ describe('MockApiServer: Simple URI', () => {
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 200],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 201],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 202],
-        ])('STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when calling METHOD /one/two',
+        ])('[' + typeDescription + '] STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when calling METHOD /one/two',
             async (method: string, axiosCall: () => Promise<any>, status: number) => {
-                const testResultData: object = { testBaseResponse: 'passed' }
-
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve([])
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.' + status + '.json'])
-                givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.' + status + '.json', testResultData)
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve([])
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([method + '.' + status + fileExtension])
+                givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.' + status + fileExtension, fileContents)
 
                 const response: AxiosResponse = await axiosCall()
 
                 expect(response.status).toBe(status)
-                expect(response.data).toEqual(testResultData)
+                expect(response.data).toEqual(expectedResponse)
             }
         )
 
@@ -167,19 +166,18 @@ describe('MockApiServer: Simple URI', () => {
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 400],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 301],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 502],
-        ])('STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when calling METHOD /one/two',
+        ])('[' + typeDescription + '] STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when calling METHOD /one/two',
             async (method: string, axiosCall: () => Promise<any>, status: number) => {
-                const testResultData: object = { testBaseResponse: 'passed' }
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve([])
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.' + status + '.json'])
-                givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.' + status + '.json', testResultData)
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve([])
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([method + '.' + status + fileExtension])
+                givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.' + status + fileExtension, fileContents)
 
                 try {
                     const response: AxiosResponse = await axiosCall()
                     fail('expected call to throw an error')
                 } catch (e) {
                     expect(e.response.status).toBe(status)
-                    expect(e.response.data).toEqual(testResultData)
+                    expect(e.response.data).toEqual(expectedResponse)
                 }
             }
         )
@@ -191,17 +189,15 @@ describe('MockApiServer: Simple URI', () => {
             ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
             ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
-        ])('200 MEHTOD /: should return first file contents as mock response 200 there are two ore more possible results', async (method: string, axiosCall: () => Promise<any>) => {
-            const testResultData: object = { testBaseResponse: 'passed' }
-
-            givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.200.json', testResultData)
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve([])
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.200.json', method + '.500.json'])
+        ])('[' + typeDescription + '] 200 MEHTOD /: should return first file contents as mock response 200 there are two ore more possible results', async (method: string, axiosCall: () => Promise<any>) => {
+            givenFileHasContents(mockFileRepository, 'resources/default/one/two', method + '.200' + fileExtension, fileContents)
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve([])
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([method + '.200' + fileExtension, method + '.500.json'])
 
             const response: AxiosResponse = await axiosCall()
 
             expect(response.status).toBe(200)
-            expect(response.data).toEqual(testResultData)
+            expect(response.data).toEqual(expectedResponse)
         })
 
     })
@@ -215,17 +211,15 @@ describe('MockApiServer: Simple URI', () => {
             ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
             ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
-        ])('200 MEHTOD /one/two: should return file contents as mock response 200 when file is "/one/two.METHOD.200.json"', async (method: string, axiosCall: () => Promise<any>) => {
-            const testResultData: object = { testBaseResponse: 'passed' }
-
-            givenFileHasContents(mockFileRepository, 'resources/default/one/', 'two.' + method + '.200.json', testResultData)
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(['two.' + method + '.200.json'])
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([])
+        ])('[' + typeDescription + '] 200 MEHTOD /one/two: should return file contents as mock response 200 when file is "/one/two.METHOD.200.json"', async (method: string, axiosCall: () => Promise<any>) => {
+            givenFileHasContents(mockFileRepository, 'resources/default/one/', 'two.' + method + '.200' + fileExtension, fileContents)
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve(['two.' + method + '.200' + fileExtension])
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([])
 
             const response: AxiosResponse = await axiosCall()
 
             expect(response.status).toBe(200)
-            expect(response.data).toEqual(testResultData)
+            expect(response.data).toEqual(expectedResponse)
         })
 
         it.each([
@@ -247,18 +241,16 @@ describe('MockApiServer: Simple URI', () => {
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 200],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 201],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 202],
-        ])('STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when file is "/one/two.METHOD.STATUS.json',
+        ])('[' + typeDescription + '] STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when file is "/one/two.METHOD.STATUS.json',
             async (method: string, axiosCall: () => Promise<any>, status: number) => {
-                const testResultData: object = { testBaseResponse: 'passed' }
-
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(['two.' + method + '.' + status + '.json'])
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([])
-                givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.' + status + '.json', testResultData)
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve(['two.' + method + '.' + status + fileExtension])
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([])
+                givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.' + status + fileExtension, fileContents)
 
                 const response: AxiosResponse = await axiosCall()
 
                 expect(response.status).toBe(status)
-                expect(response.data).toEqual(testResultData)
+                expect(response.data).toEqual(expectedResponse)
             }
         )
 
@@ -281,19 +273,18 @@ describe('MockApiServer: Simple URI', () => {
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 400],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 301],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two'), 502],
-        ])('STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when file is "/one/two.METHOD.STATUS.json',
+        ])('[' + typeDescription + '] STATUS MEHTOD /one/two: should return file contents as mock response with configured STATUS when file is "/one/two.METHOD.STATUS.json',
             async (method: string, axiosCall: () => Promise<any>, status: number) => {
-                const testResultData: object = { testBaseResponse: 'passed' }
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(['two.' + method + '.' + status + '.json'])
-                when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([])
-                givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.' + status + '.json', testResultData)
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve(['two.' + method + '.' + status + fileExtension])
+                when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([])
+                givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.' + status + fileExtension, fileContents)
 
                 try {
                     const response: AxiosResponse = await axiosCall()
                     fail('expected call to throw an error')
                 } catch (e) {
                     expect(e.response.status).toBe(status)
-                    expect(e.response.data).toEqual(testResultData)
+                    expect(e.response.data).toEqual(expectedResponse)
                 }
             }
         )
@@ -305,17 +296,15 @@ describe('MockApiServer: Simple URI', () => {
             ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
             ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
-        ])('200 MEHTOD /: should return file /one/two.METHOD.STATUS.json instead of /one/two/METHOD.STATUS.json if both options exist', async (method: string, axiosCall: () => Promise<any>) => {
-            const testResultData: object = { testBaseResponse: 'passed' }
-
-            givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.200.json', testResultData)
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(["two." + method + '.200.json'])
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.200.json'])
+        ])('[' + typeDescription + '] 200 MEHTOD /: should return file /one/two.METHOD.STATUS.json instead of /one/two/METHOD.STATUS.json if both options exist', async (method: string, axiosCall: () => Promise<any>) => {
+            givenFileHasContents(mockFileRepository, 'resources/default/one', 'two.' + method + '.200' + fileExtension, fileContents)
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve(["two." + method + '.200' + fileExtension])
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([method + '.200' + fileExtension])
 
             const response: AxiosResponse = await axiosCall()
 
             expect(response.status).toBe(200)
-            expect(response.data).toEqual(testResultData)
+            expect(response.data).toEqual(expectedResponse)
         })
 
         it.each([
@@ -325,17 +314,15 @@ describe('MockApiServer: Simple URI', () => {
             ['PATCH', async () => await axios.patch(hostUrl + '/one/two', {})],
             ['DELETE', async () => await axios.delete(hostUrl + '/one/two')],
             ['OPTIONS', async () => await axios.options(hostUrl + '/one/two')],
-        ])('200 MEHTOD /: should return first file /one/two.METHOD.STATUS.json instead of /one/two/METHOD.STATUS.json if multiple of both options exist', async (method: string, axiosCall: () => Promise<any>) => {
-            const testResultData: object = { testBaseResponse: 'passed' }
-
-            givenFileHasContents(mockFileRepository, 'resources/default/one', "two." + method + '.200.json', testResultData)
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one'))).thenResolve(["two." + method + '.200.json', "two." + method + '.500.json'])
-            when(mockFileRepository.getAllFilenamesInDir(path.join('resources/default/one/two'))).thenResolve([method + '.200.json', method + '.500.json'])
+        ])('[' + typeDescription + '] 200 MEHTOD /: should return first file /one/two.METHOD.STATUS.json instead of /one/two/METHOD.STATUS.json if multiple of both options exist', async (method: string, axiosCall: () => Promise<any>) => {
+            givenFileHasContents(mockFileRepository, 'resources/default/one', "two." + method + '.200' + fileExtension, fileContents)
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one'))).thenResolve(["two." + method + '.200' + fileExtension, "two." + method + '.500.json'])
+            when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources/default/one/two'))).thenResolve([method + '.200' + fileExtension, method + '.500.json'])
 
             const response: AxiosResponse = await axiosCall()
 
             expect(response.status).toBe(200)
-            expect(response.data).toEqual(testResultData)
+            expect(response.data).toEqual(expectedResponse)
         })
     })
 

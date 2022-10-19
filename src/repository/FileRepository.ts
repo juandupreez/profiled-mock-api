@@ -1,9 +1,9 @@
 import fs from 'fs'
 
 export class FileRepository {
-    async readFileContents (responseFileBasePath: string): Promise<any> {
+    async readFileContents (responseFileBasePath: string): Promise<string> {
         const fileContents: Buffer = fs.readFileSync(responseFileBasePath)
-        return JSON.parse(fileContents.toString())
+        return fileContents.toString()
     }
 
     async getAllFilenamesInDir (directoryPath: string): Promise<string[]> {
