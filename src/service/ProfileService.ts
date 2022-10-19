@@ -22,7 +22,12 @@ export class ProfileService {
     }
 
     getCurProfileBaseDir (): string {
-        return 'resources/default'
+        const curProfile: Profile = this.profiles[this.activeProfile]
+        if (curProfile === undefined) {
+            throw new Error('Could not get active profile (' + this.activeProfile + ') because no such profile is configured')
+        } else {
+            return curProfile.responseFileBasePath
+        }
     }
 
     readProfilesFromFileSystem (profileDirectory: string | undefined, fileRepository: FileRepository) {
