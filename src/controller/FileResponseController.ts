@@ -65,7 +65,7 @@ export class FileResponseController {
     private async _getPossibleFilePathsByDirectory (directoryPath: string, method: string): Promise<string[]> {
         const allFilesInDirectory: string[] = await this.fileRepository.getAllFilenamesInDirIfDirExists(directoryPath) ?? []
         const fileNamesWithMethod: string[] = allFilesInDirectory.filter((singleFileName) => {
-            return singleFileName.includes(method)
+            return singleFileName.startsWith(method)
         })
         const filteredFilesWithDirectory: string[] = fileNamesWithMethod.map((singleFileName: string) => {
             return path.join(directoryPath, singleFileName)
