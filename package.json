@@ -1,6 +1,6 @@
 {
   "name": "profiled-mock-api",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/profiled-mock-api.js",
   "scripts": {
