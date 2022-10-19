@@ -1,5 +1,4 @@
-import { Request, ParamsDictionary, Response } from "express-serve-static-core"
-import { ParsedQs } from "qs"
+import { Request, Response } from "express-serve-static-core"
 import { FileRepository } from "../repository/FileRepository"
 import path from 'path'
 import { ProfileService } from "../service/ProfileService"
@@ -53,7 +52,7 @@ export class FileResponseController {
         }
         const oneDirectoryUp: string = path.normalize(path.join(directoryPath, '..'))
         const lastUriPartToUseAsFile: string = directoryPath.replace(oneDirectoryUp, "")
-        const allFilesInOneUpDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(oneDirectoryUp) ?? []
+        const allFilesInOneUpDirectory: string[] = await this.fileRepository.getAllFilenamesInDirIfDirExists(oneDirectoryUp) ?? []
         const fileNamesWithLastUriPartAndMethod: string[] = allFilesInOneUpDirectory.filter((singleFileName) => {
             return path.join('/', singleFileName).includes(lastUriPartToUseAsFile + '.' + method)
         })
@@ -64,7 +63,7 @@ export class FileResponseController {
     }
 
     private async _getPossibleFilePathsByDirectory (directoryPath: string, method: string): Promise<string[]> {
-        const allFilesInDirectory: string[] = await this.fileRepository.getAllFilenamesInDir(directoryPath) ?? []
+        const allFilesInDirectory: string[] = await this.fileRepository.getAllFilenamesInDirIfDirExists(directoryPath) ?? []
         const fileNamesWithMethod: string[] = allFilesInDirectory.filter((singleFileName) => {
             return singleFileName.includes(method)
         })

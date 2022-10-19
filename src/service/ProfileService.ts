@@ -25,7 +25,7 @@ export class ProfileService {
         return 'resources/default'
     }
 
-    async readProfilesFromFileSystem (profileDirectory: string | undefined, fileRepository: FileRepository) {
+    readProfilesFromFileSystem (profileDirectory: string | undefined, fileRepository: FileRepository) {
         if (profileDirectory !== undefined) {
             const subDirectoryNames: string[] = fileRepository.getAllDirectoryNamesInDirSync(profileDirectory) ?? []
             subDirectoryNames.forEach((singleSubDirectoryName) => {
