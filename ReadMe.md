@@ -6,7 +6,9 @@ The root directory of the response files can be separated by "profiles."
 
 
 ## Getting Started
-### Step 1: Create and run the mock server
+
+### Step 1: Create mock server
+One can create a new `index.ts` file and fill it with contents:
 
 ```
 import { MockApiServer, GlobalLogger, LogLevel } from 'profiled-mock-api'
@@ -22,6 +24,7 @@ const mockServer: MockApiServer = new MockApiServer({
 
 mockServer.start()
 ```
+
 ### Step 2: Create response files
 With file structure: 
 
@@ -29,7 +32,7 @@ With file structure:
 node_modules
 responses
     default
-
+        ping.json
 index.ts
 package.json
 
@@ -41,9 +44,16 @@ we can create ping.json:
 }
 ```
 
-### Step 3: Call the endpoint:
+`responses` is where the profile directories will be stored. `responses/default` is the root directory where responses of the "default" profile will be served from. 
 
-GET ```http://localhost:3000/ping```
+### Step 3: Run the server:
+```
+ts-node index.ts
+```
+
+### Step 4: Call the endpoint:
+
+GET http://localhost:3000/ping
 
 
 
