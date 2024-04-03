@@ -11,6 +11,7 @@ module.exports = {
         "**/test/api-server/3_ProfileInitialization.test.ts",
         "**/test/api-server/4_ProfileStateManagement.test.ts",
         "**/test/api-server/5_ProfileDirectoryPointing.test.ts",
+        "**/test/api-server/6_ResponseFilesWithStrangeNames.test.ts",
         
     ],
     transform: {

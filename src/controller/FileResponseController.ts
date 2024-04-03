@@ -53,10 +53,10 @@ export class FileResponseController {
         const oneDirectoryUp: string = path.normalize(path.join(directoryPath, '..'))
         const lastUriPartToUseAsFile: string = directoryPath.replace(oneDirectoryUp, "")
         const allFilesInOneUpDirectory: string[] = await this.fileRepository.getAllFilenamesInDirIfDirExists(oneDirectoryUp) ?? []
-        const fileNamesWithLastUriPartAndMethod: string[] = allFilesInOneUpDirectory.filter((singleFileName) => {
-            return path.join('/', singleFileName).includes(lastUriPartToUseAsFile + '.' + method)
-        })
-        const filteredFilesWithDirectory: string[] = fileNamesWithLastUriPartAndMethod.map((singleFileName: string) => {
+        // const fileNamesWithLastUriPartAndMethod: string[] = allFilesInOneUpDirectory.filter((singleFileName) => {
+        //     return path.join('/', singleFileName).includes(lastUriPartToUseAsFile + '.' + method)
+        // })
+        const filteredFilesWithDirectory: string[] = allFilesInOneUpDirectory.map((singleFileName: string) => {
             return path.join(oneDirectoryUp, singleFileName)
         })
         return filteredFilesWithDirectory
@@ -86,8 +86,12 @@ export class FileResponseController {
     }
 
     private _extractStatusFromFilePath (fileLocation: string): number {
-        const httpCodeMatches: RegExpMatchArray = fileLocation.match(/\d\d\d/)
-        return parseInt(httpCodeMatches[0] ?? '200')
+        const httpCodeMatches: RegExpMatchArray | null = fileLocation.match(/\d\d\d/)
+        if (httpCodeMatches === null) {
+            return 200
+        } else {
+            return parseInt(httpCodeMatches[0] ?? '200')
+        }
     }
 
 }
