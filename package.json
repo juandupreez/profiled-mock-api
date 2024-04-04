@@ -5,7 +5,7 @@
   "main": "dist/profiled-mock-api.js",
   "scripts": {
     "start": "ts-node ./bin/start-mock-server.ts",
-    "test": "jest",
+    "test": "jest --run-in-band",
     "build": "tsc -p build.tsconfig.json"
   },
   "author": "jdupreez@mit.edu",

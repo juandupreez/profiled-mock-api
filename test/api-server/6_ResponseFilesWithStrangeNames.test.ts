@@ -43,7 +43,7 @@ describe('MockApiServer: Files with strange names', () => {
         mockApiServer.stop()
     })
 
-    fit('should default to 200 when no method or status',
+    it('should default to 200 when no method or status',
         async () => {
 
             givenFileHasContents(mockFileRepository, 'resources/default/',  'ping.json', JSON.stringify({message: 'pong'}))
@@ -59,7 +59,7 @@ describe('MockApiServer: Files with strange names', () => {
     it('should not fail when the response file name has no 200 in it but only GET and description',
         async () => {
 
-            givenFileHasContents(mockFileRepository, 'resources/default/',  'ping.json', JSON.stringify({message: 'pong'}))
+            givenFileHasContents(mockFileRepository, 'resources/default/',  'ping.GET.json', JSON.stringify({message: 'pong'}))
             when(mockFileRepository.getAllFilenamesInDirIfDirExists(path.join('resources\\default'))).thenResolve(['ping.GET.json'])
 
             const response: AxiosResponse = await axios.get(hostUrl + '/ping')

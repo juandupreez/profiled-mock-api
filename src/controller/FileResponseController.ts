@@ -53,10 +53,10 @@ export class FileResponseController {
         const oneDirectoryUp: string = path.normalize(path.join(directoryPath, '..'))
         const lastUriPartToUseAsFile: string = directoryPath.replace(oneDirectoryUp, "")
         const allFilesInOneUpDirectory: string[] = await this.fileRepository.getAllFilenamesInDirIfDirExists(oneDirectoryUp) ?? []
-        // const fileNamesWithLastUriPartAndMethod: string[] = allFilesInOneUpDirectory.filter((singleFileName) => {
-        //     return path.join('/', singleFileName).includes(lastUriPartToUseAsFile + '.' + method)
-        // })
-        const filteredFilesWithDirectory: string[] = allFilesInOneUpDirectory.map((singleFileName: string) => {
+        const fileNamesWithLastUriPart: string[] = allFilesInOneUpDirectory.filter((singleFileName) => {
+            return path.join('/', singleFileName).includes(lastUriPartToUseAsFile)
+        })
+        const filteredFilesWithDirectory: string[] = fileNamesWithLastUriPart.map((singleFileName: string) => {
             return path.join(oneDirectoryUp, singleFileName)
         })
         return filteredFilesWithDirectory
