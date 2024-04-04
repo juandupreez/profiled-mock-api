@@ -30,7 +30,8 @@ export class FileResponseController {
             const extractedStatus: number = this._extractStatusFromFilePath(chosenResponseFileLocation)
             this.logger.trace('Response file: ' + chosenResponseFileLocation)
             const responseBody: any = await this.fileRepository.readFileContents(chosenResponseFileLocation)
-            res.status(extractedStatus).send(responseBody)
+            const contentType: string = this._deduceContentTypeFromFileName(chosenResponseFileLocation)
+            res.setHeader('Content-Type', contentType).status(extractedStatus).send(responseBody)
         } catch (e) {
             this.logger.error(e)
 
@@ -46,6 +47,7 @@ export class FileResponseController {
             }
         }
     }
+
     private async _getPossibleFilePathsByFile (directoryPath: string, method: string, dirToExclude: string): Promise<string[]> {
         if (directoryPath.split(/[\\|/]+$/).join('') == dirToExclude.split(/[\\|/]+$/).join('')) {
             return []
@@ -91,6 +93,16 @@ export class FileResponseController {
             return 200
         } else {
             return parseInt(httpCodeMatches[0] ?? '200')
+        }
+    }
+
+    private _deduceContentTypeFromFileName (chosenResponseFileLocation: string): string {
+        if (chosenResponseFileLocation.endsWith('json')) {
+            return 'application/json'
+        } else if (chosenResponseFileLocation.endsWith('xml')) {
+            return 'application/xml'
+        } else {
+            return 'application/json'
         }
     }
 

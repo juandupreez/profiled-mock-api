@@ -10,6 +10,7 @@ module.exports = {
         "**/test/api-server/5_ProfileDirectoryPointing.test.ts",
         "**/test/api-server/6_ResponseFilesWithStrangeNames.test.ts",
         "**/test/api-server/7_RequestWithParams.test.ts",
+        "**/test/api-server/8_ContentTypeHeader.test.ts",
         
     ],
     transform: {
