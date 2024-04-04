@@ -19,7 +19,7 @@ export class FileResponseController {
 
         try {
             const profileBaseDir: string = this.profileService.getCurProfileBaseDir()
-            const requestUri: string = req.url
+            const requestUri: string = req.path
             const method: string = req.method
 
             const possibleResponseFilePaths: string[] = [

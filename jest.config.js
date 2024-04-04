@@ -1,7 +1,4 @@
 module.exports = {
-    // roots: [
-    //     "<rootDir>/src"
-    // ],
     testMatch: [
         // "**/test/repository/FileRepository.test.ts",
         // // "**/test/handler/MockRequestHandler.test.ts",
@@ -12,6 +9,7 @@ module.exports = {
         "**/test/api-server/4_ProfileStateManagement.test.ts",
         "**/test/api-server/5_ProfileDirectoryPointing.test.ts",
         "**/test/api-server/6_ResponseFilesWithStrangeNames.test.ts",
+        "**/test/api-server/7_RequestWithParams.test.ts",
         
     ],
     transform: {
