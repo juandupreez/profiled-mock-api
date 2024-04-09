@@ -8,7 +8,7 @@ The root directory of the response files can be separated by "profiles."
 ## Getting Started
 
 ### Step 1: Create mock server
-One can create a new `index.ts` file and fill it with contents:
+Create a new `index.ts` file:
 
 ```
 import { MockApiServer, GlobalLogger, LogLevel } from 'profiled-mock-api'
@@ -44,7 +44,7 @@ we can create ping.json:
 }
 ```
 
-`responses` is where the profile directories will be stored. `responses/default` is the root directory where responses of the "default" profile will be served from. 
+The directory `responses` is where the profile directories will be stored. `responses/default` is the root directory where responses of the "default" profile will be served from. 
 
 ### Step 3: Run the server:
 ```
@@ -75,10 +75,10 @@ resources
 Calls:
 - GET http://localhost:3000/ping
 - POST http://localhost:3000/ping
-- <any http method> http://localhost:3000/ping
+- any http method http://localhost:3000/ping
 - GET http://localhost:3000/some/deep/path/status
 - POST http://localhost:3000/some/deep/path/status
-- <any http method> http://localhost:3000/some/deep/path/status
+- any http method http://localhost:3000/some/deep/path/status
 
 ### Option 2: Complex Files with HTTP Method:
 Directory Structure:
@@ -190,6 +190,19 @@ GET ```http://localhost:3000/activeProfile```:
 ```
 
 ### Changing Active Profile:
+
+
+#### Option 1: with GET
+GET ```http://localhost:3000/setActiveProfile?newlyActiveProfile=test_case_happy_path```: 
+
+Response 200: 
+```
+{
+    "activeProfile":"test_case_happy_path"
+}
+```
+
+#### Option 2: with POST
 The active profile can be seen at
 POST ```http://localhost:3000/activeProfile```: 
 with body
@@ -198,6 +211,9 @@ with body
     "newlyActiveProfile": "test_case_happy_path"
 }
 ```
-Response 200: {
-
+Response 200: 
+```
+{
+    "activeProfile":"test_case_happy_path"
 }
+```
